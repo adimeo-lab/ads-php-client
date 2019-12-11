@@ -1,0 +1,12 @@
+{
+	"name": "adimeo-data-suite/security",
+  "type": "symfony-bundle",
+  "autoload": {
+    "psr-4": { "AdimeoDataSuite\\Bundle\\ADSSecurityBundle\\": "" }
+  },
+  "require": {
+    "symfony/framework-bundle": "*",
+    "symfony/security": "*",
+    "adimeo-data-suite/commons": "*"
+  }
+}

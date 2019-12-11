@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Adimeo Data Suite search</title>
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700" rel="stylesheet">
+  <link href="{{asset('bundles/adimeodatasuitesearchclient/css/normalize.css')}}" rel="stylesheet" />
+  <link rel="stylesheet" href="{{asset('js/jquery-ui/jquery-ui.min.css')}}" />
+  <script type="text/javascript">
+    var __searchclient_base_url = '{{path('search_client_homepage')}}';
+    var __base_url = '{{baseUrl}}';
+    var __searchclient_service_url = '{{ serviceUrl|raw }}';
+    var __searchclient_mapping = '{{ mapping }}';
+    var __searchclient_params = {{ searchParams|json_encode()|trim()|raw }};
+  </script>
+  <script type="text/javascript" src="{{asset('js/jquery-1.11.3.min.js')}}"></script>
+  <script type="text/javascript" src="{{asset('js/jquery-ui/jquery-ui.min.js')}}"></script>
+  <script type="text/javascript" src="{{asset('js/prettyprint.js')}}"></script>
+  <script type="text/javascript" src="{{asset('bundles/adimeodatasuitesearchclient/js/jquery.mark.min.js')}}"></script>
+  <script type="text/javascript" src="{{asset('bundles/adimeodatasuitesearchclient/js/search.js')}}"></script>
+  <style type="text/css">
+    a.ajax-link {
+      background: url({{ asset('bundles/adimeodatasuitesearchclient/images/loading_small.gif') }}) no-repeat -2em -2em;
+    }
+
+    .search-form input[type="submit"] {
+      background-image: url({{ asset('bundles/adimeodatasuitesearchclient/images/search.png') }});
+    }
+
+    .facet-block h2:after {
+      background-image: url({{ asset('bundles/adimeodatasuitesearchclient/images/arrow.png') }});
+    }
+  </style>
+  <link href="{{asset('bundles/adimeodatasuitesearchclient/css/search.css')}}" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="{{ asset('images/logo48.png') }}"/>
+</head>
+<body>
+<main>
+  <div class="search-form">
+    <form method="get" action="">
+      <input type="hidden" name="mapping" value="{{ context.mapping }}"/>
+      <input type="hidden" name="sp_id" value="{{ searchPageId }}"/>
+      <div class="form-item">
+        <input type="text" name="query" value="{{ context.query }}" placeholder="Search : enter keywords..." autocomplete="off" />
+      </div>
+      <div class="form-action">
+        <input type="submit" value="Search"/>
+      </div>
+    </form>
+  </div>
+  {% if sortingOptions is defined and sortingOptions is not empty or facets is defined and facets is not empty%}
+    <div class="sidebar">
+      {% if sortingOptions is defined and sortingOptions is not empty %}
+        <div class="sorting">
+          <h2>Sort by</h2>
+          <div class="sorting-content">
+            <ul>
+              {% for sortingOption in sortingOptions %}
+                <li{{ sortingOption.active ? ' class="active"' : '' }}><a href="{{ sortingOption.url }}" class="ajax-link">{{ sortingOption.label }}</a></li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      {% endif %}
+      {% if facets is defined and facets is not empty %}
+        <div class="facets">
+          {% for facet_def in searchParams.facets %}
+            {% set facet_name = facet_def|keys.0 %}
+            {% set facet_label = facet_def[facet_def|keys.0].label is defined ? facet_def[facet_def|keys.0].label : 'No name' %}
+            {% if facets[facet_name] is defined %}
+              {% set facet = facets[facet_name] %}
+              {% if facet.buckets|length > 0 %}
+                {% set active = false %}
+                {% for value in facet.buckets %}
+                  {% if value.applied is defined and value.applied %}
+                    {% set active = true %}
+                  {% endif %}
+                {% endfor %}
+                <div id="facet-block-{{ facet_name|replace({'.': '_'}) }}" class="facet-block{% if active %} active{% endif %}">
+                  <h2>{{ facet_label }}</h2>
+                  <div class="facet-content">
+                    {% if facet_def[facet_def|keys.0].isDate is defined and facet_def[facet_def|keys.0].isDate %}
+                      <div>
+                        {% set values = {
+                        "1" : "Moins d'un mois",
+                        "2" : "Moins de 3 mois",
+                        "3" : "Moins de 6 mois",
+                        "4" : "Moins d'un an",
+                        "5" : "Plus d'un an"
+                        } %}
+                        <ul class="facet-list">
+                          {% for index, label in values %}
+                            {% set value = facet.buckets[index] %}
+                            {% if value.applied %}
+                              <li>{{ label }} ({{ value.doc_count }}) <a href="{{ value.facet_link }}"
+                                                                         class="remove-filter ajax-link">Remove</a>
+                              </li>
+                            {% else %}
+                              <li><a href="{{ value.facet_link }}" class="ajax-link">{{ label }} </a>
+                                ({{ value.doc_count }})
+                              </li>
+                            {% endif %}
+                          {% endfor %}
+                        </ul>
+                      </div>
+                    {% else %}
+                      <ul class="facet-list">
+                        {% for value in facet.buckets %}
+                          {% if value.applied %}
+                            <li>{{ value.key }} ({{ value.doc_count }}) <a href="{{ value.facet_link }}"
+                                                                           class="remove-filter ajax-link">Remove</a>
+                            </li>
+                          {% else %}
+                            <li><a href="{{ value.facet_link }}" class="ajax-link">{{ value.key }}</a>
+                              ({{ value.doc_count }})
+                            </li>
+                          {% endif %}
+                        {% endfor %}
+                      </ul>
+                      {% if facet.see_more_link is defined %}
+                        <div class="see-more">
+                          <a href="{{ facet.see_more_link }}" class="ajax-link">See more</a>
+                        </div>
+                      {% endif %}
+                    {% endif %}
+                  </div>
+                </div>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  {% endif %}
+  <div class="results{% if (facets is not defined or facets is empty) and (sortingOptions is not defined or sortingOptions is empty) %} no-facets{% endif %}">
+    <div class="search-stat"><strong>{{ context.total }}</strong> results <em>(search took {{ context.took }}ms)</em></div>
+    <div class="results-list">
+      {% if context.didYouMean is not null and context.total < 5 %}
+        <div class="did-you-mean">Did you mean <em><a
+                href="{{ path('search_client_homepage', {mapping: mapping, sp_id: searchPageId, query: context.didYouMean}) }}">{{ context.didYouMean }}</a></em>?
+        </div>
+      {% endif %}
+      {% if context.autopromote is defined and context.autopromote|length > 0 %}
+        <div class="autopromote-list">
+          {% for autopromote in context.autopromote %}
+            <div class="autopromote-item">
+              {% if autopromote.image is not null and autopromote.image is not empty %}
+                <div class="image">
+                  <img src="{{ autopromote.image }}" />
+                </div>
+              {% endif %}
+              <div class="info">
+                <h3><a href="{{ autopromote.url }}" target="_blank">{{ autopromote.title }}</a></h3>
+                <div class="description">
+                  {{ autopromote.body|raw }}
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+      <ul>
+        {% for result in context.results %}
+          <li data-mapping-name="{{ mapping }}" data-record-id="{{ result._id }}">
+            {% include "@AdimeoDataSuiteSearchClient/Default/result-item.html.twig" %}
+            <div class="source">
+              {{ result|json_encode() }}
+            </div>
+            {% if searchParams.more_like_this is defined and searchParams.more_like_this|length > 0 %}
+              <div class="more-like-this">
+                <a href="{{ path('search_client_mlt', {mapping: mapping, sp_id: searchPageId, doc_id: result._id, fields: searchParams.more_like_this|join(',')}) }}"
+                   class="ajax-link">See more like this</a>
+              </div>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class="pager">
+      {{ pager|raw }}
+    </div>
+  </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,23 @@
+{
+    "mapping": {
+        "data": {
+            "type": "text",
+            "store": true
+        },
+        "name": {
+            "type": "text",
+            "store": true,
+            "fields": {
+                "raw": {
+                    "type": "keyword",
+                    "store": true
+                }
+            },
+            "analyzer": "standard"
+        },
+        "keywords": {
+            "type": "text",
+            "store": true
+        }
+    }
+}

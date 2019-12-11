@@ -1,0 +1,9 @@
+{
+  "name": "adimeo-data-suite/tika",
+  "autoload": {
+    "psr-4": { "AdimeoDataSuite\\": "" }
+  },
+  "require": {
+    "adimeo-data-suite/commons": "*"
+  }
+}

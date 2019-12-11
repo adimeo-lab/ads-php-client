@@ -1,0 +1,11 @@
+{
+	"name": "adimeo-data-suite/filters",
+  "autoload": {
+    "psr-4": { "AdimeoDataSuite\\": "" }
+  },
+  "require": {
+    "adimeo-data-suite/commons": "*",
+    "symfony/css-selector": "*",
+    "guzzlehttp/guzzle": "*"
+  }
+}

@@ -1,0 +1,31 @@
+{
+    "name": "adimeo/data-suite",
+    "type": "library",
+    "description": "",
+    "license": "MIT",
+    "require": {
+        "php": "^7.2.5",
+        "elasticsearch/elasticsearch": "^5.0",
+        "guzzlehttp/guzzle": "^6.5",
+        "vgrem/php-spo": "^2.3"
+    },
+    "require-dev": {
+        "vimeo/psalm": "^3.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "Adimeo\\DataSuite\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Adimeo\\DataSuite\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "preferred-install": {
+            "*": "dist"
+        },
+        "sort-packages": true
+    }
+}
